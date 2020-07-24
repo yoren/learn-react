@@ -7,7 +7,10 @@
     "dev": "webpack-dev-server --mode development --disable-host-check"
   },
   "babel": {
-    "presets": ["@babel/preset-env", "@babel/preset-react"]
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
   },
   "dependencies": {
     "react": "^16.13.1",
