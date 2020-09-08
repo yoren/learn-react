@@ -94,7 +94,7 @@ function ReposGrid({ repos }) {
 }
 
 ReposGrid.propTypes = {
-  repos: PropTypes.array.isRequired
+  repos: PropTypes.object.isRequired
 };
 
 export default class Popular extends React.Component {
@@ -104,7 +104,7 @@ export default class Popular extends React.Component {
     this.state = {
       selectedLanguage: "All",
       error: null,
-      repos: null
+      repos: {}
     };
 
     this.updateLanguage = this.updateLanguage.bind(this);
@@ -118,28 +118,33 @@ export default class Popular extends React.Component {
   updateLanguage(selectedLanguage) {
     this.setState({
       selectedLanguage,
-      error: null,
-      repos: null
+      error: null
     });
 
-    fetchPopularRepos(selectedLanguage)
-      .then((repos) => {
-        this.setState({
-          repos,
-          error: null
-        });
-      })
-      .catch((error) => {
-        console.warn("Error fetching repos: ", error);
+    if (!this.state.repos[selectedLanguage]) {
+      fetchPopularRepos(selectedLanguage)
+        .then((data) => {
+          this.setState(({ repos }) => ({
+            repos: {
+              ...repos,
+              [selectedLanguage]: data
+            }
+          }));
+        })
+        .catch((error) => {
+          console.warn("Error fetching repos: ", error);
 
-        this.setState({
-          error: "There was an error fecthing the repos."
+          this.setState({
+            error: "There was an error fecthing the repos."
+          });
         });
-      });
+    }
   }
 
   isLoading() {
-    return this.state.repos === null && this.state.error === null;
+    const { selectedLanguage, repos, error } = this.state;
+
+    return !repos[selectedLanguage] && error === null;
   }
 
   render() {
@@ -156,7 +161,9 @@ export default class Popular extends React.Component {
 
         {error && <p>{error}</p>}
 
-        {repos && <ReposGrid repos={repos} />}
+        {repos[selectedLanguage] && (
+          <ReposGrid repos={repos[selectedLanguage]} />
+        )}
       </React.Fragment>
     );
   }
